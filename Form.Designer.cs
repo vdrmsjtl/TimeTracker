@@ -63,7 +63,8 @@ partial class Form
     {
         Visible = false;
         ShowInTaskbar = false;
-        _trayIcon.Text = HoursWorked;
+
+        _trayIcon.Text = string.Empty;
 
         base.OnLoad(e);
     }
