@@ -5,7 +5,7 @@ namespace TimeTracker.Ui;
 
 public partial class Form : System.Windows.Forms.Form
 {
-    private readonly Dictionary<string, object> _currentDateRecord;
+    private readonly TrackedDay _currentDay;
 
     private readonly DateTime _lastMonday =
         DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
@@ -13,9 +13,9 @@ public partial class Form : System.Windows.Forms.Form
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "MyTrackedTimes.json");
 
-    private readonly List<Dictionary<string, object>> _records;
-
     private readonly DateTime _startTime = DateTime.Now;
+
+    private readonly List<TrackedDay> _trackedDays;
 
     private DateTime _breakStartTime;
     private bool _isOnBreak;
@@ -23,23 +23,23 @@ public partial class Form : System.Windows.Forms.Form
     public Form()
     {
         InitializeComponent();
-        _records = LoadRecordsFromFile(_path);
-        _currentDateRecord = _records.FirstOrDefault(r => DateTime.Parse(r["Date"].ToString()) == _startTime.Date);
 
-        if (_currentDateRecord == null)
+        _trackedDays = LoadRecordsFromFileDays();
+        _currentDay = _trackedDays.FirstOrDefault(d => d.Date.Date == _startTime.Date);
+
+        if (_currentDay == null)
         {
-            _currentDateRecord = new Dictionary<string, object>
-            {
-                { "Date", _startTime.ToShortDateString() },
-                { "Start", _startTime.ToShortTimeString() },
-                { "End", "" },
-                { "Break", "" },
-                { "Work", "" }
-            };
+            _currentDay = new TrackedDay();
+            _currentDay.SetStartTime(_startTime);
+            _trackedDays.Add(_currentDay);
 
-            _records.Add(_currentDateRecord);
+            UpdateRecords();
+        }
+        else
+        {
+            _currentDay.AddSession(_startTime);
 
-            File.WriteAllText(_path, JsonConvert.SerializeObject(_records));
+            UpdateRecords();
         }
 
         FormClosing += SysTrayApp_FormClosing;
@@ -52,75 +52,71 @@ public partial class Form : System.Windows.Forms.Form
             var now = DateTime.Now;
 
             //this day
-            var startTime = DateTime.ParseExact(_currentDateRecord["Start"].ToString(), "HH:mm", null);
-            var endTime = startTime.AddHours(8);
-            if (!TryParse(_currentDateRecord["Break"].ToString(), out var breaks)) breaks = default;
+            var workedTime = _currentDay.GetWorkedTime(now);
+            var breakTime = _currentDay.GetBreakTime();
 
-            var duration = now - startTime - breaks;
+            var endTime = _currentDay.Date.AddHours(8);
+            var remainingTime = endTime - now - workedTime + breakTime;
+
             var lapsedBreakTime = _isOnBreak ? DateTime.Now - _breakStartTime : Zero;
-            var remainingTime = endTime - now + breaks + lapsedBreakTime;
 
             //this week
-            var parsedRecords = _records
-                .TakeLast(5)
-                .Select(r =>
-                {
-                    TryParse(r["Work"].ToString(), out var work);
-
-                    return new
-                    {
-                        Date = DateTime.Parse(r["Date"].ToString()),
-                        Work = work
-                    };
-                })
-                .ToList();
-
-            var workedWeek = parsedRecords
+            var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now)
-                .Aggregate(Zero, (current, pr) => current.Add(pr.Work)) + (duration - breaks);
+                .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTime;
+
+            var lapsedTimeString = $"Lapsed Time: {workedTime.Hours}H {workedTime.Minutes}m {workedTime.Seconds}s";
+
+            var remainingTimeString =
+                $"\nRemaining Time: {remainingTime.Hours}H {remainingTime.Minutes}m {remainingTime.Seconds}s";
+
+            var workedWeekString =
+                $"\nWorked this Week: {workedWeek.Hours}H {workedWeek.Minutes}m {workedWeek.Seconds}s";
+
+            var statusString = $"\n{(_isOnBreak ? "Status: On Break" : "Status: Working")}";
+
+            var breakTimeString =
+                $"{(_isOnBreak ? $"\n\nBreak Time: {lapsedBreakTime.Hours}H {lapsedBreakTime.Minutes}m {lapsedBreakTime.Seconds}s" : string.Empty)}";
 
             return
-                $"Lapsed Time: {duration.Hours}H {duration.Minutes}m {duration.Seconds}s\nRemaining Time: {remainingTime.Hours}H {remainingTime.Minutes}m {duration.Seconds}s\nWorked this Week: {workedWeek.Hours}H {workedWeek.Minutes}m {workedWeek.Seconds}s\n{(_isOnBreak ? "Status: On Break" : "Status: Working")}{(_isOnBreak ? $"\n\nBreak Time: {lapsedBreakTime.Hours}H {lapsedBreakTime.Minutes}m {lapsedBreakTime.Seconds}s" : string.Empty)}";
+                $"{lapsedTimeString}{remainingTimeString}{workedWeekString}{statusString}{breakTimeString}";
         }
     }
 
-    private List<Dictionary<string, object>> LoadRecordsFromFile(string path)
+    private List<TrackedDay> LoadRecordsFromFileDays()
     {
         try
         {
-            var fileContent = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(fileContent) ??
-                   new List<Dictionary<string, object>>();
+            var settings = new JsonSerializerSettings
+            {
+                DateFormatHandling = DateFormatHandling.IsoDateFormat
+            };
+
+            var fileContent = File.ReadAllText(_path);
+            return JsonConvert.DeserializeObject<List<TrackedDay>>(fileContent, settings) ??
+                   new List<TrackedDay>();
         }
         catch (Exception)
         {
-            return new List<Dictionary<string, object>>();
+            return new List<TrackedDay>();
         }
     }
 
     private void SysTrayApp_FormClosing(object? sender, FormClosingEventArgs e)
     {
         var endTime = DateTime.Now;
-        _currentDateRecord["End"] = endTime.ToShortTimeString();
-
-        var startTime = DateTime.Parse(_currentDateRecord["Start"].ToString());
-        if (!TryParse(_currentDateRecord["Break"].ToString(), out var breakTime)) breakTime = default;
-
-        var workTime = endTime - startTime - breakTime;
-        _currentDateRecord["Work"] = workTime.ToString();
-
+        _currentDay.SetEndTime(endTime);
         UpdateRecords();
     }
 
     private void UpdateRecords()
     {
-        var existingRecordIndex = _records.FindIndex(r => DateTime.Parse(r["Date"].ToString()) == _startTime.Date);
-        if (existingRecordIndex >= 0)
-            _records[existingRecordIndex] = _currentDateRecord;
-        else
-            _records.Add(_currentDateRecord);
+        var settings = new JsonSerializerSettings
+        {
+            DateFormatHandling = DateFormatHandling.IsoDateFormat
+        };
 
-        File.WriteAllText(_path, JsonConvert.SerializeObject(_records, Formatting.Indented));
+        File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, Formatting.Indented, settings));
     }
 
     private void BreakContinue()
@@ -134,10 +130,7 @@ public partial class Form : System.Windows.Forms.Form
         else
         {
             _isOnBreak = false;
-            var lapsedBreakTime = DateTime.Now - _breakStartTime;
-            if (!TryParse(_currentDateRecord["Break"].ToString(), out var breakTime)) breakTime = default;
-
-            _currentDateRecord["Break"] = breakTime + lapsedBreakTime;
+            _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
             _breakStartTime = default;
             _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
             UpdateRecords();
