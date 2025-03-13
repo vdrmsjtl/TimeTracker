@@ -1,0 +1,5 @@
+C:\Users\VDurmus\RiderProjects\TimeTracker.Ui\TimeTracker.Ui\obj\Debug\net8.0-windows\win-x64\TimeTracker.Ui.csproj.AssemblyReference.cache
+C:\Users\VDurmus\RiderProjects\TimeTracker.Ui\TimeTracker.Ui\obj\Debug\net8.0-windows\win-x64\TimeTracker.Ui.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\VDurmus\RiderProjects\TimeTracker.Ui\TimeTracker.Ui\obj\Debug\net8.0-windows\win-x64\TimeTracker.Ui.AssemblyInfoInputs.cache
+C:\Users\VDurmus\RiderProjects\TimeTracker.Ui\TimeTracker.Ui\obj\Debug\net8.0-windows\win-x64\TimeTracker.Ui.AssemblyInfo.cs
+C:\Users\VDurmus\RiderProjects\TimeTracker.Ui\TimeTracker.Ui\obj\Debug\net8.0-windows\win-x64\TimeTracker.Ui.csproj.CoreCompileInputs.cache
