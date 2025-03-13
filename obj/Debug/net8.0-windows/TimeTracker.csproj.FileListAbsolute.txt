@@ -17,3 +17,4 @@ C:\Users\VDurmus\RiderProjects\TimeTracker\obj\Debug\net8.0-windows\refint\TimeT
 C:\Users\VDurmus\RiderProjects\TimeTracker\obj\Debug\net8.0-windows\TimeTracker.pdb
 C:\Users\VDurmus\RiderProjects\TimeTracker\obj\Debug\net8.0-windows\TimeTracker.genruntimeconfig.cache
 C:\Users\VDurmus\RiderProjects\TimeTracker\obj\Debug\net8.0-windows\ref\TimeTracker.dll
+C:\Users\VDurmus\RiderProjects\TimeTracker\obj\Debug\net8.0-windows\TimeTracker.sourcelink.json
