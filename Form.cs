@@ -90,12 +90,12 @@ public partial class Form : System.Windows.Forms.Form
             };
 
             var fileContent = File.ReadAllText(_path);
-            return JsonConvert.DeserializeObject<List<TrackedDay>>(fileContent, settings) ??
-                   new List<TrackedDay>();
+            var data = JsonConvert.DeserializeObject<List<TrackedDay>>(fileContent, settings) ?? [];
+            return data.TakeLast(7).ToList();
         }
         catch (Exception)
         {
-            return new List<TrackedDay>();
+            return [];
         }
     }
 
