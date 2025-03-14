@@ -5,7 +5,7 @@ namespace TimeTracker.Ui;
 
 public partial class Form : System.Windows.Forms.Form
 {
-    private readonly TrackedDay _currentDay;
+    private readonly TrackedDay? _currentDay;
 
     private readonly DateTime _lastMonday =
         DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
