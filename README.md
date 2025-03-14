@@ -15,13 +15,12 @@ When added to Windows Autostart, it tracks all your working times automatically.
 ![image](https://github.com/user-attachments/assets/6c40e85a-8fd4-4626-87a5-786aa870a27e)
 ![image](https://github.com/user-attachments/assets/9afd8fda-0f39-468d-9f15-b4b8ec64c920)
 
-**Double-Click on the Icon to take a break!**
-
 ## **Usage**
 
 Once executed, Time Tracker, represented by a Task Tray icon, immediately starts tracking your work hours. Below are the Time Tracker's operations:
 
-- Click the task tray icon to see the current status including worked hours, remaining time, status, and break time.
+- Hover over the task tray icon to see the current status including worked hours, remaining time, status, and break time.
+- Double-click on the icon to take a break.
 - Right-click the icon and select "Start/End Break" to start or end a break.
 - On closing the app, the current session ends and worked times (including breaks) are saved.
 
