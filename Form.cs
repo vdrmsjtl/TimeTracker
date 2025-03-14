@@ -11,7 +11,7 @@ public partial class Form : System.Windows.Forms.Form
         DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
 
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "MyTrackedTimes.json");
+        "TimeTrackerTimes.json");
 
     private readonly DateTime _startTime = DateTime.Now;
 
