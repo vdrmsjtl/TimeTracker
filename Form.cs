@@ -91,7 +91,7 @@ public partial class Form : System.Windows.Forms.Form
 
             var fileContent = File.ReadAllText(_path);
             var data = JsonConvert.DeserializeObject<List<TrackedDay>>(fileContent, settings) ?? [];
-            return data.TakeLast(7).ToList();
+            return data.TakeLast(6).ToList();
         }
         catch (Exception)
         {
