@@ -8,32 +8,36 @@ public class TrackedDay
 
     [JsonProperty] public TimeSpan WorkedHours { get; set; }
 
-    [JsonProperty] private List<Session> Sessions { get; set; } = new List<Session>();
+    [JsonProperty] private List<Session> Sessions { get; set; } = new();
 
     private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
 
     public void SetStartTime(DateTime startTime)
     {
         Date = startTime;
-        AddSession(startTime);
+        CreateSession(startTime);
     }
-    
-    public void SetEndTime(DateTime endTime)
+
+    public void EndSession(DateTime endTime)
     {
-        CurrentSession.SetEndTime(endTime);
+        CurrentSession.EndSession(endTime);
         WorkedHours = GetWorkedTime(endTime);
     }
 
     public TimeSpan GetBreakTime()
     {
-        return CurrentSession.GetTotalBreakTime();
+        var totalBreakTime = Sessions
+            .Select(s => s.BreakDuration())
+            .Aggregate(TimeSpan.Zero, (current, t) => current + t);
+
+        return totalBreakTime;
     }
 
     public TimeSpan GetWorkedTime(DateTime now)
     {
         var totalWorkedTime = Sessions
             .Select(session => session.SessionDuration(now))
-            .Aggregate(TimeSpan.Zero, (current, sessionTime) => current + sessionTime);
+            .Aggregate(TimeSpan.Zero, (current, t) => current + t);
 
         return totalWorkedTime;
     }
@@ -43,7 +47,7 @@ public class TrackedDay
         CurrentSession.AddBreak(@break);
     }
 
-    public void AddSession(DateTime startTime)
+    public void CreateSession(DateTime startTime)
     {
         Sessions.Add(new Session(startTime));
     }

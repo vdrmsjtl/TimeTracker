@@ -15,7 +15,7 @@ public class Session(DateTime startTime)
         Breaks.Add(@break);
     }
 
-    public TimeSpan GetTotalBreakTime()
+    public TimeSpan BreakDuration()
     {
         return Breaks.Aggregate(TimeSpan.Zero, (current, @break) => current + @break.BreakDuration);
     }
@@ -25,7 +25,7 @@ public class Session(DateTime startTime)
         return (EndTime == default ? now : EndTime) - StartTime;
     }
 
-    public void SetEndTime(DateTime endTime)
+    public void EndSession(DateTime endTime)
     {
         EndTime = endTime;
     }

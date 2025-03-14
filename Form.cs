@@ -37,7 +37,7 @@ public partial class Form : System.Windows.Forms.Form
         }
         else
         {
-            _currentDay.AddSession(_startTime);
+            _currentDay.CreateSession(_startTime);
 
             UpdateRecords();
         }
@@ -54,29 +54,26 @@ public partial class Form : System.Windows.Forms.Form
             //this day
             var workedTime = _currentDay.GetWorkedTime(now);
             var breakTime = _currentDay.GetBreakTime();
-
-            var endTime = _currentDay.Date.AddHours(8);
-            var remainingTime = endTime - now - workedTime + breakTime;
-
-            var lapsedBreakTime = _isOnBreak ? DateTime.Now - _breakStartTime : Zero;
+            var currentBreakTime = _isOnBreak ? now - _breakStartTime : Zero;
+            var remainingTime = FromHours(8) - (workedTime - currentBreakTime) + breakTime;
 
             //this week
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTime;
 
-            var lapsedTimeString = $"Lapsed Time: {workedTime.Hours}H {workedTime.Minutes}m {workedTime.Seconds}s";
+            var lapsedTimeString = $"Worked Time: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
 
             var remainingTimeString =
-                $"\nRemaining Time: {remainingTime.Hours}H {remainingTime.Minutes}m {remainingTime.Seconds}s";
+                $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
 
             var workedWeekString =
-                $"\nWorked this Week: {workedWeek.Hours}H {workedWeek.Minutes}m {workedWeek.Seconds}s";
+                $"\nWorked this Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s";
 
             var statusString = $"\n{(_isOnBreak ? "Status: On Break" : "Status: Working")}";
 
             var breakTimeString =
-                $"{(_isOnBreak ? $"\n\nBreak Time: {lapsedBreakTime.Hours}H {lapsedBreakTime.Minutes}m {lapsedBreakTime.Seconds}s" : string.Empty)}";
+                $"{(_isOnBreak ? $"\n\nBreak Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}";
 
             return
                 $"{lapsedTimeString}{remainingTimeString}{workedWeekString}{statusString}{breakTimeString}";
@@ -104,8 +101,12 @@ public partial class Form : System.Windows.Forms.Form
 
     private void SysTrayApp_FormClosing(object? sender, FormClosingEventArgs e)
     {
-        var endTime = DateTime.Now;
-        _currentDay.SetEndTime(endTime);
+        if (_isOnBreak)
+        {
+            StopBreak();
+        }
+
+        _currentDay.EndSession(DateTime.Now);
         UpdateRecords();
     }
 
@@ -123,17 +124,27 @@ public partial class Form : System.Windows.Forms.Form
     {
         if (!_isOnBreak)
         {
-            _isOnBreak = true;
-            _breakStartTime = DateTime.Now;
-            _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "pause-48.ico"));
+            StartBreak();
         }
         else
         {
-            _isOnBreak = false;
-            _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
-            _breakStartTime = default;
-            _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
-            UpdateRecords();
+            StopBreak();
         }
+    }
+
+    private void StartBreak()
+    {
+        _isOnBreak = true;
+        _breakStartTime = DateTime.Now;
+        _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "pause-48.ico"));
+    }
+
+    private void StopBreak()
+    {
+        _isOnBreak = false;
+        _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
+        _breakStartTime = default;
+        _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
+        UpdateRecords();
     }
 }

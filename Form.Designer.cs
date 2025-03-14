@@ -54,9 +54,15 @@ partial class Form
         _trayIcon.MouseDoubleClick += (sender, args) => this.BreakContinue();
     }
     
+    private DateTime _lastRun = DateTime.MinValue;
+    
     void TrayIconOnMouseMove(object sender, MouseEventArgs e)
     {
+        if (DateTime.Now.Subtract(_lastRun).TotalSeconds < 1)
+            return;
+
         _trayIcon.Text = HoursWorked;
+        _lastRun = DateTime.Now;
     }
     
     protected override void OnLoad(EventArgs e)
