@@ -58,11 +58,11 @@ partial class Form
     
     void TrayIconOnMouseMove(object sender, MouseEventArgs e)
     {
-        if (DateTime.Now.Subtract(_lastRun).TotalSeconds < 1)
+        var now = DateTime.Now;
+        if (now.Subtract(_lastRun).TotalSeconds < 1)
             return;
-
         _trayIcon.Text = HoursWorked;
-        _lastRun = DateTime.Now;
+        _lastRun = now;
     }
     
     protected override void OnLoad(EventArgs e)
