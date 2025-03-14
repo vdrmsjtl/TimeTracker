@@ -117,7 +117,7 @@ public partial class Form : System.Windows.Forms.Form
             DateFormatHandling = DateFormatHandling.IsoDateFormat
         };
 
-        File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, settings));
+        File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, Formatting.Indented, settings));
     }
 
     private void BreakContinue()
