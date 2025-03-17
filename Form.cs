@@ -65,7 +65,9 @@ public partial class Form : System.Windows.Forms.Form
             var lapsedTimeString = $"Worked Today: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
 
             var remainingTimeString =
-                $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
+                remainingTime.TotalSeconds < 0
+                    ? $"\nOvertime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s"
+                    : $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
 
             var workedWeekString =
                 $"\nWorked this Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s";
