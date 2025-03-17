@@ -9,6 +9,8 @@
         <RootNamespace>TimeTracker.Ui</RootNamespace>
         <LangVersion>default</LangVersion>
         <ApplicationIcon>timer-48.ico</ApplicationIcon>
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
