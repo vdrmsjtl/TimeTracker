@@ -46,7 +46,7 @@ partial class Form
         
         _trayIcon = new NotifyIcon();
         _trayIcon.Text = String.Empty;
-        _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
+        _trayIcon.Icon = TimeTrackerResources.TimerIcon;
  
         _trayIcon.ContextMenuStrip = _trayMenu;
         _trayIcon.Visible = true;

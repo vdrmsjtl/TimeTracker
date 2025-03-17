@@ -140,7 +140,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         _isOnBreak = true;
         _breakStartTime = DateTime.Now;
-        _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "pause-48.ico"));
+        _trayIcon.Icon = TimeTrackerResources.PauseIcon;
     }
 
     private void StopBreak()
@@ -148,7 +148,7 @@ public partial class Form : System.Windows.Forms.Form
         _isOnBreak = false;
         _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
         _breakStartTime = default;
-        _trayIcon.Icon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
+        _trayIcon.Icon = TimeTrackerResources.TimerIcon;
         UpdateRecords();
     }
 }
