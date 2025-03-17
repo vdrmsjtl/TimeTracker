@@ -8,6 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>TimeTracker.Ui</RootNamespace>
         <LangVersion>default</LangVersion>
+        <ApplicationIcon>timer-48.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -19,18 +20,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="TimeTrackerResources.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>TimeTrackerResources.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
+      <None Update="pause-48.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="timer-48.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Resources\timer-48.ico" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="pause-48.ico" />
-    </ItemGroup>
-
 </Project>

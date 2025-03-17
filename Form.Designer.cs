@@ -35,7 +35,10 @@ partial class Form
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(800, 450);
         this.Text = "TimeTracker";
-        
+
+        _pauseIcon = new Icon(Path.Combine(Application.StartupPath, "pause-48.ico"));
+        _timerIcon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
+
         _trayMenu = new ContextMenuStrip();
         var exitMenuItem = new ToolStripMenuItem {Text = "Exit"};
         exitMenuItem.Click += OnExit;
@@ -46,7 +49,7 @@ partial class Form
         
         _trayIcon = new NotifyIcon();
         _trayIcon.Text = String.Empty;
-        _trayIcon.Icon = TimeTrackerResources.TimerIcon;
+        _trayIcon.Icon = _timerIcon;
  
         _trayIcon.ContextMenuStrip = _trayMenu;
         _trayIcon.Visible = true;

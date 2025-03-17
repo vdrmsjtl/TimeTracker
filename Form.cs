@@ -19,6 +19,8 @@ public partial class Form : System.Windows.Forms.Form
 
     private DateTime _breakStartTime;
     private bool _isOnBreak;
+    private Icon _pauseIcon;
+    private Icon _timerIcon;
 
     public Form()
     {
@@ -142,7 +144,7 @@ public partial class Form : System.Windows.Forms.Form
     {
         _isOnBreak = true;
         _breakStartTime = DateTime.Now;
-        _trayIcon.Icon = TimeTrackerResources.PauseIcon;
+        _trayIcon.Icon = _pauseIcon;
     }
 
     private void StopBreak()
@@ -150,7 +152,7 @@ public partial class Form : System.Windows.Forms.Form
         _isOnBreak = false;
         _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
         _breakStartTime = default;
-        _trayIcon.Icon = TimeTrackerResources.TimerIcon;
+        _trayIcon.Icon = _timerIcon;
         UpdateRecords();
     }
 }
