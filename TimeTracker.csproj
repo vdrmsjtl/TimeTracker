@@ -11,6 +11,7 @@
         <ApplicationIcon>timer-48.ico</ApplicationIcon>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
