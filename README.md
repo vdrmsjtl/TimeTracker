@@ -1,4 +1,4 @@
-# TimeTracker
+# TimeTracker  [![.NET](https://github.com/vdrmsjtl/TimeTracker/actions/workflows/dotnet.yml/badge.svg)](https://github.com/vdrmsjtl/TimeTracker/actions/workflows/dotnet.yml)
 
 Time Tracker is a .NET app aimed at tracking your working time. It conveniently calculates hours worked, break durations and provides total worked times for the day and week.
 When added to Windows Autostart, it tracks all your working times automatically.
