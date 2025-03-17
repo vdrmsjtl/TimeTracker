@@ -59,7 +59,7 @@ public partial class Form : System.Windows.Forms.Form
 
             //this week
             var workedWeek = _trackedDays
-                .Where(pr => pr.Date >= _lastMonday && pr.Date < now)
+                .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTime;
 
             var lapsedTimeString = $"Worked Time: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
