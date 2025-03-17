@@ -62,7 +62,7 @@ public partial class Form : System.Windows.Forms.Form
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTime;
 
-            var lapsedTimeString = $"Worked Time: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
+            var lapsedTimeString = $"Worked Today: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
 
             var remainingTimeString =
                 $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
