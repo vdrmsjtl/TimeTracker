@@ -4,6 +4,12 @@ namespace TimeTracker.Ui;
 
 public class TrackedDay
 {
+    public TrackedDay(DateTime startTime)
+    {
+        Date = startTime;
+        CreateSession(startTime);
+    }
+
     [JsonProperty] public DateTime Date { get; set; }
 
     [JsonProperty] public TimeSpan WorkedHours { get; set; }
@@ -11,30 +17,6 @@ public class TrackedDay
     [JsonProperty] private List<Session> Sessions { get; set; } = new();
 
     [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
-
-    public void CleanUpSessions()
-    {
-        var sessionsToRemove = new List<Session>();
-
-        foreach (var session in Sessions)
-        {
-            session.Breaks.RemoveAll(b => b.EndTime == default);
-
-            if (session != CurrentSession && session.EndTime == default)
-                sessionsToRemove.Add(session);
-        }
-
-        foreach (var session in sessionsToRemove)
-        {
-            Sessions.Remove(session);
-        }
-    }
-
-    public TrackedDay(DateTime startTime)
-    {
-        Date = startTime;
-        CreateSession(startTime);
-    }
 
     public void EndSession(DateTime endTime)
     {
@@ -68,5 +50,19 @@ public class TrackedDay
     public void CreateSession(DateTime startTime)
     {
         Sessions.Add(new Session(startTime));
+    }
+
+    public void CleanUpSessions()
+    {
+        Sessions.RemoveAll(session => session != CurrentSession && session.EndTime == default);
+        foreach (var session in Sessions)
+        {
+            session.Breaks.RemoveAll(b => b.EndTime == default);
+        }
+    }
+
+    public void DiscardSession()
+    {
+        if (Sessions.Count != 0) Sessions.RemoveAt(Sessions.Count - 1);
     }
 }

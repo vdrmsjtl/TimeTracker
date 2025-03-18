@@ -13,21 +13,21 @@ public partial class Form : System.Windows.Forms.Form
 
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TimeTrackerTimes.json");
-    
-    private readonly List<TrackedDay> _trackedDays;
 
+    private readonly List<TrackedDay> _trackedDays;
     private DateTime _breakStartTime;
-    private readonly DateTime _sessionStartTime;
+    private bool _discardSession;
     private bool _isOnBreak;
+
     private Icon _pauseIcon;
     private Icon _timerIcon;
 
     public Form()
     {
         InitializeComponent();
-        
+
         var now = DateTime.Now;
-        
+
         _trackedDays = LoadRecordsFromFileDays();
         _currentDay = _trackedDays.FirstOrDefault(d => d.Date.Date == now.Date);
 
@@ -44,9 +44,7 @@ public partial class Form : System.Windows.Forms.Form
         _trackedDays.ForEach(day => day.CleanUpSessions());
         UpdateRecords();
 
-        _sessionStartTime = now;
-
-        FormClosing += SysTrayApp_FormClosing;
+        FormClosing += OnFormClosing;
     }
 
     private string HoursWorked
@@ -71,26 +69,16 @@ public partial class Form : System.Windows.Forms.Form
             var sb = new StringBuilder();
             sb.AppendLine($"Today: {workedTodayTime.Hours}h {workedTodayTime.Minutes}m {workedTodayTime.Seconds}s");
 
-            if (breaksToday.TotalSeconds > 0)
-            {
-                sb.AppendLine($"Breaks: {breaksToday.Hours}h {breaksToday.Minutes}m {breaksToday.Seconds}s");
-            }
+            if (breaksToday.TotalSeconds > 0) sb.AppendLine($"Breaks: {breaksToday.Hours}h {breaksToday.Minutes}m {breaksToday.Seconds}s");
 
             if (remainingTime.TotalSeconds < 0)
-            {
                 sb.AppendLine($"Overtime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s");
-            }
             else
-            {
                 sb.AppendLine($"Remaining: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s");
-            }
 
             sb.AppendLine($"This Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s");
 
-            if (_isOnBreak)
-            {
-                sb.AppendLine($"{(_isOnBreak ? $"Break Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}");
-            }
+            if (_isOnBreak) sb.AppendLine($"{(_isOnBreak ? $"Break Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}");
 
             sb.Append($"{(_isOnBreak ? "\nStatus: On Break" : "\nStatus: Working")}");
 
@@ -117,14 +105,18 @@ public partial class Form : System.Windows.Forms.Form
         }
     }
 
-    private void SysTrayApp_FormClosing(object? sender, FormClosingEventArgs e)
+    private void OnFormClosing(object? sender, FormClosingEventArgs e)
     {
-        if (_isOnBreak)
+        if (_discardSession)
         {
-            StopBreak();
+            _currentDay.DiscardSession();
+        }
+        else
+        {
+            if (_isOnBreak) StopBreak();
+            _currentDay.EndSession(DateTime.Now);
         }
 
-        _currentDay.EndSession(DateTime.Now);
         UpdateRecords();
     }
 
@@ -137,7 +129,7 @@ public partial class Form : System.Windows.Forms.Form
 
 #if DEBUG
         return;
-#endif    
+#endif
 
         File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, Formatting.Indented, settings));
     }
@@ -150,13 +142,9 @@ public partial class Form : System.Windows.Forms.Form
     private void BreakContinue()
     {
         if (!_isOnBreak)
-        {
             StartBreak();
-        }
         else
-        {
             StopBreak();
-        }
     }
 
     private void StartBreak()

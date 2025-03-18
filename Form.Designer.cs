@@ -40,11 +40,15 @@ partial class Form
         _timerIcon = new Icon(Path.Combine(Application.StartupPath, "timer-48.ico"));
 
         _trayMenu = new ContextMenuStrip();
-        var exitMenuItem = new ToolStripMenuItem {Text = "Exit"};
+        var exitMenuItem = new ToolStripMenuItem {Text = "Save && Exit"};
         exitMenuItem.Click += OnExit;
-        var breakContinueMenuItem = new ToolStripMenuItem {Text = "Take a Break / Continue"};
+        var discardExitMenuItem = new ToolStripMenuItem {Text = "Discard session && Exit"};
+        discardExitMenuItem.Click += OnDiscardExit;
+        var breakContinueMenuItem = new ToolStripMenuItem {Text = "Take a break / Continue"};
         breakContinueMenuItem.Click += (sender, args) => this.BreakContinue();
+
         _trayMenu.Items.Add(breakContinueMenuItem);
+        _trayMenu.Items.Add(discardExitMenuItem);
         _trayMenu.Items.Add(exitMenuItem);
         
         _trayIcon = new NotifyIcon();
@@ -80,6 +84,12 @@ partial class Form
     
     private void OnExit(object sender, EventArgs e)
     {
+        Application.Exit();
+    }
+    
+    private void OnDiscardExit(object sender, EventArgs e)
+    {
+        _discardSession = true;
         Application.Exit();
     }
 
