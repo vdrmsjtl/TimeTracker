@@ -13,7 +13,7 @@
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <PublishSingleFile>true</PublishSingleFile>
         <IsPackable>false</IsPackable>
-        <AssemblyVersion>1.0.5</AssemblyVersion>
+        <AssemblyVersion>1.0.6</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
