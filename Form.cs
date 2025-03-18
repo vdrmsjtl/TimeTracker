@@ -12,12 +12,11 @@ public partial class Form : System.Windows.Forms.Form
 
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TimeTrackerTimes.json");
-
-    private readonly DateTime _startTime = DateTime.Now;
-
+    
     private readonly List<TrackedDay> _trackedDays;
 
     private DateTime _breakStartTime;
+    private DateTime _sessionStartTime;
     private bool _isOnBreak;
     private Icon _pauseIcon;
     private Icon _timerIcon;
@@ -25,24 +24,27 @@ public partial class Form : System.Windows.Forms.Form
     public Form()
     {
         InitializeComponent();
-
+        
+        var now = DateTime.Now;
+        
         _trackedDays = LoadRecordsFromFileDays();
-        _currentDay = _trackedDays.FirstOrDefault(d => d.Date.Date == _startTime.Date);
+        _currentDay = _trackedDays.FirstOrDefault(d => d.Date.Date == now.Date);
 
         if (_currentDay == null)
         {
-            _currentDay = new TrackedDay();
-            _currentDay.SetStartTime(_startTime);
+            _currentDay = new TrackedDay(now);
             _trackedDays.Add(_currentDay);
 
             UpdateRecords();
         }
         else
         {
-            _currentDay.CreateSession(_startTime);
+            _currentDay.CreateSession(now);
 
             UpdateRecords();
         }
+
+        _sessionStartTime = now;
 
         FormClosing += SysTrayApp_FormClosing;
     }
@@ -52,35 +54,26 @@ public partial class Form : System.Windows.Forms.Form
         get
         {
             var now = DateTime.Now;
-
-            //this day
-            var workedTime = _currentDay.GetWorkedTime(now);
-            var breakTime = _currentDay.GetBreakTime();
             var currentBreakTime = _isOnBreak ? now - _breakStartTime : Zero;
-            var remainingTime = FromHours(8) - (workedTime - currentBreakTime) + breakTime;
-
-            //this week
+            var workedTodayTime = _currentDay.GetWorkedTime(now) - currentBreakTime - (now - _sessionStartTime);
+            var remainingTime = FromHours(8) + _currentDay.GetBreakTime() + currentBreakTime - workedTodayTime;
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
-                .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTime;
+                .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTodayTime;
 
-            var lapsedTimeString = $"Worked Today: {workedTime.Hours}h {workedTime.Minutes}m {workedTime.Seconds}s";
+            var workedTodayString = $"Worked Today: {workedTodayTime.Hours}h {workedTodayTime.Minutes}m {workedTodayTime.Seconds}s";
 
-            var remainingTimeString =
-                remainingTime.TotalSeconds < 0
-                    ? $"\nOvertime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s"
-                    : $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
+            var remainingTimeString = remainingTime.TotalSeconds < 0
+                ? $"\nOvertime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s"
+                : $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
 
-            var workedWeekString =
-                $"\nWorked this Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s";
+            var workedWeekString = $"\nWorked this Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s";
 
             var statusString = $"\n{(_isOnBreak ? "Status: On Break" : "Status: Working")}";
 
-            var breakTimeString =
-                $"{(_isOnBreak ? $"\n\nBreak Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}";
+            var breakTimeString = $"{(_isOnBreak ? $"\n\nBreak Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}";
 
-            return
-                $"{lapsedTimeString}{remainingTimeString}{workedWeekString}{statusString}{breakTimeString}";
+            return $"{workedTodayString}{remainingTimeString}{workedWeekString}{statusString}{breakTimeString}";
         }
     }
 

@@ -10,9 +10,9 @@ public class TrackedDay
 
     [JsonProperty] private List<Session> Sessions { get; set; } = new();
 
-    private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
+    public Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
 
-    public void SetStartTime(DateTime startTime)
+    public TrackedDay(DateTime startTime)
     {
         Date = startTime;
         CreateSession(startTime);
