@@ -12,6 +12,24 @@ public class TrackedDay
 
     [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
 
+    public void CleanUpSessions()
+    {
+        var sessionsToRemove = new List<Session>();
+
+        foreach (var session in Sessions)
+        {
+            session.Breaks.RemoveAll(b => b.EndTime == default);
+
+            if (session != CurrentSession && session.EndTime == default)
+                sessionsToRemove.Add(session);
+        }
+
+        foreach (var session in sessionsToRemove)
+        {
+            Sessions.Remove(session);
+        }
+    }
+
     public TrackedDay(DateTime startTime)
     {
         Date = startTime;

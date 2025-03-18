@@ -16,7 +16,7 @@ public partial class Form : System.Windows.Forms.Form
     private readonly List<TrackedDay> _trackedDays;
 
     private DateTime _breakStartTime;
-    private DateTime _sessionStartTime;
+    private readonly DateTime _sessionStartTime;
     private bool _isOnBreak;
     private Icon _pauseIcon;
     private Icon _timerIcon;
@@ -34,15 +34,14 @@ public partial class Form : System.Windows.Forms.Form
         {
             _currentDay = new TrackedDay(now);
             _trackedDays.Add(_currentDay);
-
-            UpdateRecords();
         }
         else
         {
             _currentDay.CreateSession(now);
-
-            UpdateRecords();
         }
+
+        _trackedDays.ForEach(day => day.CleanUpSessions());
+        UpdateRecords();
 
         _sessionStartTime = now;
 
@@ -55,7 +54,7 @@ public partial class Form : System.Windows.Forms.Form
         {
             var now = DateTime.Now;
             var currentBreakTime = _isOnBreak ? now - _breakStartTime : Zero;
-            var workedTodayTime = _currentDay.GetWorkedTime(now) - currentBreakTime - (now - _sessionStartTime);
+            var workedTodayTime = _currentDay.GetWorkedTime(now) - currentBreakTime;
             var remainingTime = FromHours(8) + _currentDay.GetBreakTime() - workedTodayTime;
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
