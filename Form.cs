@@ -1,3 +1,4 @@
+using System.Text;
 using Newtonsoft.Json;
 using static System.TimeSpan;
 
@@ -54,25 +55,46 @@ public partial class Form : System.Windows.Forms.Form
         {
             var now = DateTime.Now;
             var currentBreakTime = _isOnBreak ? now - _breakStartTime : Zero;
-            var workedTodayTime = _currentDay.GetWorkedTime(now) - currentBreakTime;
-            var remainingTime = FromHours(8) + _currentDay.GetBreakTime() - workedTodayTime;
+
+            var workedTime = _currentDay.GetWorkedTime(now);
+            var breakTime = _currentDay.GetBreakTime();
+
+            var workedTodayTime = workedTime - currentBreakTime;
+            var breaksToday = breakTime + currentBreakTime;
+
+            var remainingTime = FromHours(8) + breakTime - workedTodayTime;
+
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTodayTime;
 
-            var workedTodayString = $"Worked Today: {workedTodayTime.Hours}h {workedTodayTime.Minutes}m {workedTodayTime.Seconds}s";
+            var sb = new StringBuilder();
+            sb.AppendLine($"Today: {workedTodayTime.Hours}h {workedTodayTime.Minutes}m {workedTodayTime.Seconds}s");
 
-            var remainingTimeString = remainingTime.TotalSeconds < 0
-                ? $"\nOvertime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s"
-                : $"\nRemaining Time: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s";
+            if (breaksToday.TotalSeconds > 0)
+            {
+                sb.AppendLine($"Breaks: {breaksToday.Hours}h {breaksToday.Minutes}m {breaksToday.Seconds}s");
+            }
 
-            var workedWeekString = $"\nWorked this Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s";
+            if (remainingTime.TotalSeconds < 0)
+            {
+                sb.AppendLine($"Overtime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s");
+            }
+            else
+            {
+                sb.AppendLine($"Remaining: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s");
+            }
 
-            var statusString = $"\n{(_isOnBreak ? "Status: On Break" : "Status: Working")}";
+            sb.AppendLine($"This Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s");
 
-            var breakTimeString = $"{(_isOnBreak ? $"\n\nBreak Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}";
+            if (_isOnBreak)
+            {
+                sb.AppendLine($"{(_isOnBreak ? $"Break Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}");
+            }
 
-            return $"{workedTodayString}{remainingTimeString}{workedWeekString}{statusString}{breakTimeString}";
+            sb.Append($"{(_isOnBreak ? "\nStatus: On Break" : "\nStatus: Working")}");
+
+            return sb.ToString();
         }
     }
 
@@ -120,6 +142,11 @@ public partial class Form : System.Windows.Forms.Form
         File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, Formatting.Indented, settings));
     }
 
+    private void UpdateToolTip()
+    {
+        _trayIcon.Text = HoursWorked;
+    }
+
     private void BreakContinue()
     {
         if (!_isOnBreak)
@@ -137,6 +164,7 @@ public partial class Form : System.Windows.Forms.Form
         _isOnBreak = true;
         _breakStartTime = DateTime.Now;
         _trayIcon.Icon = _pauseIcon;
+        UpdateToolTip();
     }
 
     private void StopBreak()
@@ -145,6 +173,7 @@ public partial class Form : System.Windows.Forms.Form
         _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
         _breakStartTime = default;
         _trayIcon.Icon = _timerIcon;
+        UpdateToolTip();
         UpdateRecords();
     }
 }

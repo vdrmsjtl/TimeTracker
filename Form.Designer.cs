@@ -64,7 +64,7 @@ partial class Form
         var now = DateTime.Now;
         if (now.Subtract(_lastRun).TotalSeconds < 1)
             return;
-        _trayIcon.Text = HoursWorked;
+        UpdateToolTip();
         _lastRun = now;
     }
     
