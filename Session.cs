@@ -15,12 +15,12 @@ public class Session(DateTime startTime)
         Breaks.Add(@break);
     }
 
-    public TimeSpan BreakDuration()
+    public TimeSpan GetBreakDuration()
     {
         return Breaks.Aggregate(TimeSpan.Zero, (current, @break) => current + @break.BreakDuration);
     }
 
-    public TimeSpan SessionDuration(DateTime now)
+    public TimeSpan GetSessionDuration(DateTime now)
     {
         return (EndTime == default ? now : EndTime) - StartTime;
     }

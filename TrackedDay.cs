@@ -10,7 +10,7 @@ public class TrackedDay
 
     [JsonProperty] private List<Session> Sessions { get; set; } = new();
 
-    public Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
+    [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
 
     public TrackedDay(DateTime startTime)
     {
@@ -27,7 +27,7 @@ public class TrackedDay
     public TimeSpan GetBreakTime()
     {
         var totalBreakTime = Sessions
-            .Select(s => s.BreakDuration())
+            .Select(s => s.GetBreakDuration())
             .Aggregate(TimeSpan.Zero, (current, t) => current + t);
 
         return totalBreakTime;
@@ -36,7 +36,7 @@ public class TrackedDay
     public TimeSpan GetWorkedTime(DateTime now)
     {
         var totalWorkedTime = Sessions
-            .Select(session => session.SessionDuration(now))
+            .Select(session => session.GetSessionDuration(now))
             .Aggregate(TimeSpan.Zero, (current, t) => current + t);
 
         return totalWorkedTime;
