@@ -60,7 +60,7 @@ public partial class Form : System.Windows.Forms.Form
             var workedTodayTime = workedTime - currentBreakTime;
             var breaksToday = breakTime + currentBreakTime;
 
-            var remainingTime = FromHours(8) + breakTime - workedTodayTime;
+            var remainingTime = FromHours(8) - workedTodayTime;
 
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
