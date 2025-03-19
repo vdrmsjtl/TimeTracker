@@ -76,7 +76,7 @@ public partial class Form : System.Windows.Forms.Form
             else
                 sb.AppendLine($"Remaining: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s");
 
-            sb.AppendLine($"This Week: {workedWeek.Hours}h {workedWeek.Minutes}m {workedWeek.Seconds}s");
+            sb.AppendLine($"This Week: {(int)workedWeek.TotalHours}h {workedWeek.Minutes}m {workedWeek.Seconds}s");
 
             if (_isOnBreak) sb.AppendLine($"{(_isOnBreak ? $"Break Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}");
 
