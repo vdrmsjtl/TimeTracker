@@ -28,9 +28,6 @@ Once executed, Time Tracker, represented by a Task Tray icon, immediately starts
 
 🗃️ File with all records can be found in
    ```sh
-  %APPDATA%\Roaming
-   ```
-   ```sh
   %APPDATA%\Roaming\TimeTrackerTimes.json
    ```
 
