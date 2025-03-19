@@ -12,8 +12,8 @@ When added to Windows Autostart, it tracks all your working times automatically.
 - ✅ Weekly worked hours summary
 - ✅ Informative tray icon status updates
 
-![image](https://github.com/user-attachments/assets/9644ff50-5c0a-4e25-a744-a2d01fd34e96)
-![image](https://github.com/user-attachments/assets/11c9f90b-7b5b-4179-b3cb-195103596f3b)
+![image](https://github.com/user-attachments/assets/f1dce4c4-7558-427c-8a31-0e403162339d)
+![image](https://github.com/user-attachments/assets/384454eb-e967-4e9a-8cdf-40e6d740bf14)
 
 ## **Usage**
 
