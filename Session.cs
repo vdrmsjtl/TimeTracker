@@ -1,14 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace TimeTracker.Ui;
 
-public class Session(DateTime startTime)
+public class Session(TimeSpan startTime)
 {
-    [JsonProperty] public DateTime StartTime { get; set; } = startTime;
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan StartTime { get; set; } = startTime;
 
-    [JsonProperty] public DateTime EndTime { get; set; }
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan EndTime { get; set; }
 
-    [JsonProperty] public List<Break> Breaks { get; set; } = new();
+    [JsonInclude] public List<Break> Breaks { get; set; } = [];
 
     public void AddBreak(Break @break)
     {
@@ -20,12 +24,12 @@ public class Session(DateTime startTime)
         return Breaks.Aggregate(TimeSpan.Zero, (current, @break) => current + @break.BreakDuration);
     }
 
-    public TimeSpan GetSessionDuration(DateTime now)
+    public TimeSpan GetSessionDuration(TimeSpan now)
     {
         return (EndTime == default ? now : EndTime) - StartTime;
     }
 
-    public void EndSession(DateTime endTime)
+    public void EndSession(TimeSpan endTime)
     {
         EndTime = endTime;
     }

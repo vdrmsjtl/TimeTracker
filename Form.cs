@@ -1,5 +1,5 @@
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
 using static System.TimeSpan;
 
 namespace TimeTracker.Ui;
@@ -14,8 +14,13 @@ public partial class Form : System.Windows.Forms.Form
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TimeTrackerRecords.json");
 
+    private readonly JsonSerializerOptions _serializerOptions = new(JsonSerializerOptions.Default)
+    {
+        WriteIndented = true
+    };
+
     private readonly List<TrackedDay> _trackedDays;
-    private DateTime _breakStartTime;
+    private TimeSpan _breakStartTime;
     private bool _discardSession;
     private bool _isOnBreak;
 
@@ -29,16 +34,17 @@ public partial class Form : System.Windows.Forms.Form
         var now = DateTime.Now;
 
         _trackedDays = LoadRecordsFromFileDays();
-        _currentDay = _trackedDays.FirstOrDefault(d => d.Date.Date == now.Date);
+        _currentDay = _trackedDays.FirstOrDefault(d => d.Date == now.Date);
 
         if (_currentDay == null)
         {
-            _currentDay = new TrackedDay(now);
+            _currentDay = new TrackedDay { Date = now.Date };
+            _currentDay.CreateSession(now.TimeOfDay);
             _trackedDays.Add(_currentDay);
         }
         else
         {
-            _currentDay.CreateSession(now);
+            _currentDay.CreateSession(now.TimeOfDay);
         }
 
         _trackedDays.ForEach(day => day.CleanUpSessions());
@@ -52,9 +58,9 @@ public partial class Form : System.Windows.Forms.Form
         get
         {
             var now = DateTime.Now;
-            var currentBreakTime = _isOnBreak ? now - _breakStartTime : Zero;
+            var currentBreakTime = _isOnBreak ? now.TimeOfDay - _breakStartTime : Zero;
 
-            var workedTime = _currentDay.GetWorkedTime(now);
+            var workedTime = _currentDay.GetWorkedTime(now.TimeOfDay);
             var breakTime = _currentDay.GetBreakTime();
 
             var workedTodayTime = workedTime - currentBreakTime;
@@ -90,19 +96,22 @@ public partial class Form : System.Windows.Forms.Form
     {
         try
         {
-            var settings = new JsonSerializerSettings
-            {
-                DateFormatHandling = DateFormatHandling.IsoDateFormat
-            };
-
             var fileContent = File.ReadAllText(_path);
-            var data = JsonConvert.DeserializeObject<List<TrackedDay>>(fileContent, settings) ?? [];
+            var data = JsonSerializer.Deserialize<List<TrackedDay>>(fileContent, _serializerOptions) ?? [];
+
             return data;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             return [];
         }
+    }
+
+    private void UpdateRecords()
+    {
+        var serializedString = JsonSerializer.Serialize(_trackedDays, _serializerOptions);
+        File.WriteAllText(_path, serializedString);
     }
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)
@@ -114,24 +123,10 @@ public partial class Form : System.Windows.Forms.Form
         else
         {
             if (_isOnBreak) StopBreak();
-            _currentDay.EndSession(DateTime.Now);
+            _currentDay.EndSession(DateTime.Now.TimeOfDay);
         }
 
         UpdateRecords();
-    }
-
-    private void UpdateRecords()
-    {
-        var settings = new JsonSerializerSettings
-        {
-            DateFormatHandling = DateFormatHandling.IsoDateFormat
-        };
-
-#if DEBUG
-        return;
-#endif
-
-        File.WriteAllText(_path, JsonConvert.SerializeObject(_trackedDays, Formatting.Indented, settings));
     }
 
     private void UpdateToolTip()
@@ -150,7 +145,7 @@ public partial class Form : System.Windows.Forms.Form
     private void StartBreak()
     {
         _isOnBreak = true;
-        _breakStartTime = DateTime.Now;
+        _breakStartTime = DateTime.Now.TimeOfDay;
         _trayIcon.Icon = _pauseIcon;
         UpdateToolTip();
     }
@@ -158,10 +153,14 @@ public partial class Form : System.Windows.Forms.Form
     private void StopBreak()
     {
         _isOnBreak = false;
-        _currentDay.AddBreak(new Break(_breakStartTime, DateTime.Now));
+        var now = DateTime.Now.TimeOfDay;
+        if (now - _breakStartTime >= FromSeconds(1))
+        {
+            _currentDay.AddBreak(new Break(_breakStartTime, now));
+        }
+
         _breakStartTime = default;
         _trayIcon.Icon = _timerIcon;
         UpdateToolTip();
-        UpdateRecords();
     }
 }

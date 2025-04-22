@@ -1,24 +1,27 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace TimeTracker.Ui;
 
 public class TrackedDay
 {
-    public TrackedDay(DateTime startTime)
+    [JsonConstructor]
+    public TrackedDay()
     {
-        Date = startTime;
-        CreateSession(startTime);
     }
 
-    [JsonProperty] public DateTime Date { get; set; }
+    [JsonInclude]
+    [JsonConverter(typeof(DateTimeConverter))]
+    public DateTime Date { get; set; }
 
-    [JsonProperty] public TimeSpan WorkedHours { get; set; }
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan WorkedHours { get; set; }
 
-    [JsonProperty] private List<Session> Sessions { get; set; } = new();
+    [JsonInclude] private List<Session> Sessions { get; set; } = [];
 
-    [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date);
+    [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date.TimeOfDay);
 
-    public void EndSession(DateTime endTime)
+    public void EndSession(TimeSpan endTime)
     {
         CurrentSession.EndSession(endTime);
         WorkedHours = GetWorkedTime(endTime);
@@ -33,7 +36,7 @@ public class TrackedDay
         return totalBreakTime;
     }
 
-    public TimeSpan GetWorkedTime(DateTime now)
+    public TimeSpan GetWorkedTime(TimeSpan now)
     {
         var totalWorkedTime = Sessions
             .Select(session => session.GetSessionDuration(now))
@@ -47,7 +50,7 @@ public class TrackedDay
         CurrentSession.AddBreak(@break);
     }
 
-    public void CreateSession(DateTime startTime)
+    public void CreateSession(TimeSpan startTime)
     {
         Sessions.Add(new Session(startTime));
     }

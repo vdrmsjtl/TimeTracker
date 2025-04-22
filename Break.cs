@@ -1,12 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace TimeTracker.Ui;
 
-public class Break(DateTime startTime, DateTime endTime)
+public class Break(TimeSpan startTime, TimeSpan endTime)
 {
-    [JsonProperty] public DateTime StartTime { get; set; } = startTime;
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan StartTime { get; set; } = startTime;
+    
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
+    public TimeSpan EndTime { get; set; } = endTime;
 
-    [JsonProperty] public DateTime EndTime { get; set; } = endTime;
-
+    [JsonInclude]
+    [JsonConverter(typeof(TimeSpanConverter))]
     public TimeSpan BreakDuration => EndTime - StartTime;
 }
