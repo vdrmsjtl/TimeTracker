@@ -44,10 +44,13 @@ public partial class Form : System.Windows.Forms.Form
         }
         else
         {
-            _currentDay.CreateSession(now.TimeOfDay);
+            var openSession = _currentDay.Sessions.LastOrDefault(session => session.EndTime == Zero);
+            if (openSession == default)
+            {
+                _currentDay.CreateSession(now.TimeOfDay);
+            }
         }
 
-        _trackedDays.ForEach(day => day.CleanUpSessions());
         UpdateRecords();
 
         FormClosing += OnFormClosing;

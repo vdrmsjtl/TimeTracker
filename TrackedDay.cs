@@ -17,7 +17,7 @@ public class TrackedDay
     [JsonConverter(typeof(TimeSpanConverter))]
     public TimeSpan WorkedHours { get; set; }
 
-    [JsonInclude] private List<Session> Sessions { get; set; } = [];
+    [JsonInclude] public List<Session> Sessions { get; set; } = [];
 
     [JsonIgnore] private Session CurrentSession => Sessions.LastOrDefault() ?? new Session(Date.TimeOfDay);
 
@@ -53,15 +53,6 @@ public class TrackedDay
     public void CreateSession(TimeSpan startTime)
     {
         Sessions.Add(new Session(startTime));
-    }
-
-    public void CleanUpSessions()
-    {
-        Sessions.RemoveAll(session => session != CurrentSession && session.EndTime == default);
-        foreach (var session in Sessions)
-        {
-            session.Breaks.RemoveAll(b => b.EndTime == default);
-        }
     }
 
     public void DiscardSession()
