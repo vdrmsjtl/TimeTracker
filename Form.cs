@@ -12,7 +12,7 @@ public partial class Form : System.Windows.Forms.Form
         DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek + (int)DayOfWeek.Monday);
 
     private readonly string _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "TimeTrackerTimes.json");
+        "TimeTrackerRecords.json");
 
     private readonly List<TrackedDay> _trackedDays;
     private DateTime _breakStartTime;
