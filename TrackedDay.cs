@@ -30,7 +30,7 @@ public class TrackedDay
     public TimeSpan GetBreakTime()
     {
         var totalBreakTime = Sessions
-            .Select(s => s.GetBreakDuration())
+            .Select(session => session.GetBreakDuration())
             .Aggregate(TimeSpan.Zero, (current, t) => current + t);
 
         return totalBreakTime;
@@ -39,7 +39,7 @@ public class TrackedDay
     public TimeSpan GetWorkedTime(TimeSpan now)
     {
         var totalWorkedTime = Sessions
-            .Select(session => session.GetSessionDuration(now))
+            .Select(session => session.GetSessionDuration(now) - session.GetBreakDuration())
             .Aggregate(TimeSpan.Zero, (current, t) => current + t);
 
         return totalWorkedTime;
