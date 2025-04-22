@@ -26,7 +26,7 @@ Once executed, Time Tracker, represented by a Task Tray icon, immediately starts
 - Right-click the icon and select "Take a Break / Continue" to start or stop a break or select "Exit" to close the application.
 - On closing the app, the current session ends and worked times (including breaks) are saved.
 
-**Tip**: Add a shortcut to Windows Autostart
+**Tip**: **Add a shortcut to Windows Autostart!**
 
 🗃️ File with all records can be found in
    ```sh
@@ -50,4 +50,3 @@ Once executed, Time Tracker, represented by a Task Tray icon, immediately starts
 
 - ## ⚡Dependencies
 - .NET 8.0
-- Newtonsoft.Json
