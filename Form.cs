@@ -62,37 +62,33 @@ public partial class Form : System.Windows.Forms.Form
         {
             var now = DateTime.Now;
             var currentBreakTime = _isOnBreak ? now.TimeOfDay - _breakStartTime : Zero;
-
             var workedTime = _currentDay.GetWorkedTime(now.TimeOfDay);
             var breakTime = _currentDay.GetBreakTime();
-
             var workedTodayTime = workedTime - currentBreakTime;
             var breaksToday = breakTime + currentBreakTime;
-
             var remainingTime = FromHours(8) - workedTodayTime;
-
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTodayTime;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Today: {workedTodayTime.Hours}h {workedTodayTime.Minutes}m {workedTodayTime.Seconds}s");
-
-            if (breaksToday.TotalSeconds > 0) sb.AppendLine($"Breaks: {breaksToday.Hours}h {breaksToday.Minutes}m {breaksToday.Seconds}s");
-
+            sb.AppendLine($"Today: {FormatTimeSpan(workedTodayTime)}s");
+            if (breaksToday.TotalSeconds > 0) sb.AppendLine($"Breaks: {FormatTimeSpan(breaksToday)}");
             if (remainingTime.TotalSeconds < 0)
-                sb.AppendLine($"Overtime: {Math.Abs(remainingTime.Hours)}h {Math.Abs(remainingTime.Minutes)}m {Math.Abs(remainingTime.Seconds)}s");
+                sb.AppendLine($"Overtime: {FormatTimeSpan(remainingTime)}");
             else
-                sb.AppendLine($"Remaining: {remainingTime.Hours}h {remainingTime.Minutes}m {remainingTime.Seconds}s");
-
-            sb.AppendLine($"This Week: {(int)workedWeek.TotalHours}h {workedWeek.Minutes}m {workedWeek.Seconds}s");
-
-            if (_isOnBreak) sb.AppendLine($"{(_isOnBreak ? $"Break Time: {currentBreakTime.Hours}h {currentBreakTime.Minutes}m {currentBreakTime.Seconds}s" : string.Empty)}");
-
-            sb.Append($"{(_isOnBreak ? "\nStatus: On Break" : "\nStatus: Working")}");
+                sb.AppendLine($"Remaining: {FormatTimeSpan(remainingTime)}");
+            sb.AppendLine($"This Week: {FormatTimeSpan(workedWeek)}");
+            sb.Append($"{(_isOnBreak ? $"\nStatus: On Break ({FormatTimeSpan(currentBreakTime)})" : "\nStatus: Working")}");
 
             return sb.ToString();
         }
+    }
+
+    private string FormatTimeSpan(TimeSpan timeSpan)
+    {
+        var absTimeSpan = FromTicks(Math.Abs(timeSpan.Ticks));
+        return $"{absTimeSpan.Days * 24 + absTimeSpan.Hours}h {absTimeSpan.Minutes}m {absTimeSpan.Seconds}s";
     }
 
     private List<TrackedDay> LoadRecordsFromFileDays()
@@ -113,6 +109,9 @@ public partial class Form : System.Windows.Forms.Form
 
     private void UpdateRecords()
     {
+#if DEBUG
+        return;
+#endif
         var serializedString = JsonSerializer.Serialize(_trackedDays, _serializerOptions);
         File.WriteAllText(_path, serializedString);
     }
