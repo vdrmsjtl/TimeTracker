@@ -72,12 +72,9 @@ public partial class Form : System.Windows.Forms.Form
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTodayTime;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Today: {FormatTimeSpan(workedTodayTime)}s");
+            sb.AppendLine($"Today: {FormatTimeSpan(workedTodayTime)}");
             if (breaksToday.TotalSeconds > 0) sb.AppendLine($"Breaks: {FormatTimeSpan(breaksToday)}");
-            if (remainingTime.TotalSeconds < 0)
-                sb.AppendLine($"Overtime: {FormatTimeSpan(remainingTime)}");
-            else
-                sb.AppendLine($"Remaining: {FormatTimeSpan(remainingTime)}");
+            sb.AppendLine($"{(remainingTime < Zero ? $"Overtime: {FormatTimeSpan(FromTicks(Math.Abs(remainingTime.Ticks)))}" : $"Remaining: {FormatTimeSpan(remainingTime)}")}");
             sb.AppendLine($"This Week: {FormatTimeSpan(workedWeek)}");
             sb.Append($"{(_isOnBreak ? $"\nStatus: On Break ({FormatTimeSpan(currentBreakTime)})" : "\nStatus: Working")}");
 
