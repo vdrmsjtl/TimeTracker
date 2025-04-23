@@ -23,10 +23,12 @@ Once executed, Time Tracker, represented by a Task Tray icon, immediately starts
 
 - Hover over the task tray icon to see the current status including worked hours, remaining time, status, and break time.
 - Double-click on the icon to take a break or continue working.
-- Right-click the icon and select "Take a Break / Continue" to start or stop a break or select "Exit" to close the application.
+- Right-click the icon and select "Take a Break / Continue" to start or stop a break.
+- Right-click the icon and select "Discard session & Exit" to discard the current session and close the application without saving.
+- Right-click the icon and select "Save & Exit" to end the session and close the application.
 - On closing the app, the current session ends and worked times (including breaks) are saved.
 
-**Tip**: **Add a shortcut to Windows Autostart!**
+**Tip**: **Add a shortcut to Windows Autostart to automatically run the application on Windows startup!**
 
 🗃️ File with all records can be found in
    ```sh
