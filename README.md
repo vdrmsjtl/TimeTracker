@@ -30,6 +30,10 @@ Once executed, Time Tracker, represented by a Task Tray icon, immediately starts
 
 **Tip**: **Add a shortcut to Windows Autostart to automatically run the application on Windows startup!**
 
+---
+
+## **Resources**
+
 🗃️ File with all records can be found in
    ```sh
   %APPDATA%\Roaming\TimeTrackerRecords.json
