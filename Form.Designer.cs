@@ -8,6 +8,7 @@ partial class Form
     private System.ComponentModel.IContainer components = null;
     private NotifyIcon _trayIcon;
     private ContextMenuStrip _trayMenu;
+    private ToolStripMenuItem _autostartMenuItem;
     
     /// <summary>
     ///  Clean up any resources being used.
@@ -42,11 +43,14 @@ partial class Form
         _trayMenu = new ContextMenuStrip();
         var exitMenuItem = new ToolStripMenuItem {Text = "Save && Exit"};
         exitMenuItem.Click += OnExit;
+        _autostartMenuItem = new ToolStripMenuItem {Text = StartupManager.GetMenuItemText(StartupManager.ShortcutExists())};
+        _autostartMenuItem.Click += OnAddRemoveAutoStart;
         var discardExitMenuItem = new ToolStripMenuItem {Text = "Discard session && Exit"};
         discardExitMenuItem.Click += OnDiscardExit;
         var breakContinueMenuItem = new ToolStripMenuItem {Text = "Take a break / Continue"};
         breakContinueMenuItem.Click += (sender, args) => this.BreakContinue();
 
+        _trayMenu.Items.Add(_autostartMenuItem);
         _trayMenu.Items.Add(breakContinueMenuItem);
         _trayMenu.Items.Add(discardExitMenuItem);
         _trayMenu.Items.Add(exitMenuItem);
@@ -80,6 +84,11 @@ partial class Form
         _trayIcon.Text = string.Empty;
 
         base.OnLoad(e);
+    }
+
+    private void OnAddRemoveAutoStart(object sender, EventArgs e)
+    {
+        StartupManager.ToggleStartup(_autostartMenuItem);
     }
     
     private void OnExit(object sender, EventArgs e)
