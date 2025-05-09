@@ -64,7 +64,6 @@ public partial class Form : System.Windows.Forms.Form
             var currentBreakTime = _isOnBreak ? now.TimeOfDay - _breakStartTime : Zero;
             var workedTodayTime = _currentDay.GetWorkedTime(now.TimeOfDay) - currentBreakTime;
             var breaksToday = _currentDay.GetBreakTime() + currentBreakTime;
-            var remainingTime = FromHours(8) - workedTodayTime;
             var workedWeek = _trackedDays
                 .Where(pr => pr.Date >= _lastMonday && pr.Date < now.Date)
                 .Aggregate(Zero, (current, pr) => current.Add(pr.WorkedHours)) + workedTodayTime;
@@ -72,7 +71,6 @@ public partial class Form : System.Windows.Forms.Form
             var sb = new StringBuilder();
             sb.AppendLine($"Today: {FormatTimeSpan(workedTodayTime)}");
             if (breaksToday.TotalSeconds > 0) sb.AppendLine($"Breaks: {FormatTimeSpan(breaksToday)}");
-            sb.AppendLine($"{(remainingTime < Zero ? $"Overtime: {FormatTimeSpan(FromTicks(Math.Abs(remainingTime.Ticks)))}" : $"Remaining: {FormatTimeSpan(remainingTime)}")}");
             sb.AppendLine($"This Week: {FormatTimeSpan(workedWeek)}");
             sb.Append($"{(_isOnBreak ? $"\nStatus: On Break ({FormatTimeSpan(currentBreakTime)})" : "\nStatus: Working")}");
 
